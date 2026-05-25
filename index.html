@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anfila & Mustafa — Our Memory Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Special+Elite&family=Caveat:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #ffffff;
+    --paper-dark: #e8e8e8;
+    --paper-darker: #d0d0d0;
+    --ink: #1a1a1a;
+    --ink-light: #444444;
+    --ink-faint: #888888;
+    --sepia: #8a6a4a;
+    --sepia-dark: #6a4a2a;
+    --tape: rgba(210, 200, 170, 0.75);
+    --sticky-1: #f7e98e;
+    --sticky-2: #b8ddb8;
+    --sticky-3: #f7c4a0;
+    --sticky-4: #c4b8e0;
+    --sticky-5: #f4a0a8;
+    --sticky-6: #a8d8e8;
+    --sticky-7: #f9e0a0;
+    --shadow: rgba(0, 0, 0, 0.18);
+    --wall: #f4f2ee;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--wall);
+    font-family: 'Special Elite', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 3rem 2rem 1.5rem;
+    position: relative;
+  }
+
+  .header-title {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    color: #5a3e28;
+    font-size: clamp(1.4rem, 4vw, 2.8rem);
+    letter-spacing: 0.08em;
+    opacity: 0;
+    animation: fadeUp 1.4s ease forwards 0.3s;
+  }
+
+  .header-sub {
+    font-family: 'Caveat', cursive;
+    color: #8a6a4a;
+    font-size: 1.1rem;
+    margin-top: 0.4rem;
+    letter-spacing: 0.15em;
+    opacity: 0;
+    animation: fadeUp 1.4s ease forwards 0.7s;
+  }
+
+  .header-divider {
+    width: 120px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #a07850, transparent);
+    margin: 1rem auto;
+    opacity: 0;
+    animation: fadeUp 1.4s ease forwards 1s;
+  }
+
+  /* Cork Board — now with a frame, sitting on the white wall */
+  .board {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .cork-area {
+    background:
+      radial-gradient(ellipse at 20% 30%, rgba(180, 140, 80, 0.2) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 70%, rgba(140, 100, 50, 0.15) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 50%, rgba(200, 160, 90, 0.1) 0%, transparent 70%),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(160, 120, 60, 0.06) 3px,
+        rgba(160, 120, 60, 0.06) 4px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 3px,
+        rgba(160, 120, 60, 0.04) 3px,
+        rgba(160, 120, 60, 0.04) 4px
+      ),
+      #c8a46e;
+    border-radius: 3px;
+    padding: 3rem 2.5rem 4rem;
+    /* Wooden frame effect */
+    box-shadow:
+      inset 0 0 80px rgba(100, 60, 10, 0.25),
+      0 0 0 14px #8B5E3C,
+      0 0 0 18px #6B3F1F,
+      0 8px 40px rgba(0,0,0,0.25),
+      0 2px 8px rgba(0,0,0,0.15);
+    position: relative;
+    min-height: 500px;
+  }
+
+  /* Masonry grid */
+  .board-grid {
+    columns: 5;
+    column-gap: 1.5rem;
+  }
+
+  @media (max-width: 1200px) { .board-grid { columns: 4; } }
+  @media (max-width: 900px)  { .board-grid { columns: 3; } }
+  @media (max-width: 600px)  { .board-grid { columns: 2; } }
+
+  /* Photo cards — clean white Polaroid style, NO sepia */
+  .photo-card {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    transform: rotate(var(--tilt, 0deg));
+    animation: floatIn 0.8s ease forwards;
+    animation-delay: var(--delay, 0s);
+    opacity: 0;
+    cursor: zoom-in;
+    transition: transform 0.3s ease, z-index 0s;
+  }
+
+  .photo-card:hover {
+    transform: rotate(0deg) scale(1.04);
+    z-index: 50;
+  }
+
+  .photo-inner {
+    background: #ffffff;
+    padding: 8px 8px 28px;
+    box-shadow: 2px 4px 12px rgba(0,0,0,0.22), 0 1px 3px rgba(0,0,0,0.12);
+    position: relative;
+  }
+
+  /* Tape strips */
+  .photo-inner::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(var(--tape-rot, -2deg));
+    width: 56px;
+    height: 20px;
+    background: var(--tape);
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+
+  .photo-img {
+    width: 100%;
+    display: block;
+    /* NO sepia filter — natural colors */
+    filter: none;
+    border: none;
+  }
+
+  .photo-caption {
+    font-family: 'Caveat', cursive;
+    font-size: 0.85rem;
+    color: #444;
+    text-align: center;
+    margin-top: 5px;
+    letter-spacing: 0.02em;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .photo-date {
+    font-family: 'Special Elite', serif;
+    font-size: 0.6rem;
+    color: #aaa;
+    position: absolute;
+    bottom: 6px;
+    right: 9px;
+    letter-spacing: 0.07em;
+  }
+
+  /* Sticky notes */
+  .sticky-note {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    width: 100%;
+    transform: rotate(var(--tilt, 0deg));
+    animation: floatIn 0.8s ease forwards;
+    animation-delay: var(--delay, 0s);
+    opacity: 0;
+    transition: transform 0.3s ease;
+    position: relative;
+    cursor: default;
+  }
+
+  .sticky-note:hover {
+    transform: rotate(0deg) scale(1.04);
+    z-index: 50;
+  }
+
+  .sticky-inner {
+    background: var(--color);
+    padding: 1rem 1rem 1.2rem;
+    min-height: 90px;
+    box-shadow: 3px 5px 16px rgba(0,0,0,0.18), 1px 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+  }
+
+  .sticky-inner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: rgba(0,0,0,0.07);
+  }
+
+  .sticky-inner::after {
+    content: '';
+    position: absolute;
+    bottom: -7px;
+    right: 8px;
+    width: 0;
+    height: 0;
+    border-left: 14px solid transparent;
+    border-top: 7px solid rgba(0,0,0,0.15);
+    filter: blur(1px);
+  }
+
+  .sticky-text {
+    font-family: 'Caveat', cursive;
+    font-size: 1rem;
+    color: #2c1a0e;
+    line-height: 1.6;
+    font-weight: 600;
+  }
+
+  .sticky-text.big {
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* Main letter */
+  .letter-card {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    width: 100%;
+    position: relative;
+    animation: floatIn 1s ease forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .letter-card:hover { transform: scale(1.01); z-index: 50; }
+
+  .letter-inner {
+    background: #ffffff;
+    padding: 1.6rem 1.4rem;
+    box-shadow: 3px 6px 20px rgba(0,0,0,0.18);
+    position: relative;
+    background-image:
+      repeating-linear-gradient(
+        transparent,
+        transparent 27px,
+        rgba(100, 120, 200, 0.12) 27px,
+        rgba(100, 120, 200, 0.12) 28px
+      );
+  }
+
+  .letter-inner::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 40%;
+    transform: translateX(-50%) rotate(-1deg);
+    width: 76px;
+    height: 22px;
+    background: var(--tape);
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  }
+
+  .letter-inner::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 65%;
+    transform: translateX(-50%) rotate(2deg);
+    width: 56px;
+    height: 20px;
+    background: var(--tape);
+    border-radius: 2px;
+    opacity: 0.85;
+  }
+
+  .letter-salutation {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: #1a1a1a;
+    margin-bottom: 0.7rem;
+  }
+
+  .letter-body {
+    font-family: 'IM Fell English', serif;
+    font-size: 0.8rem;
+    color: #444;
+    line-height: 1.85;
+    text-align: justify;
+  }
+
+  .letter-body p {
+    margin-bottom: 0.6rem;
+    text-indent: 1rem;
+  }
+
+  .letter-preview {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    color: #888;
+    margin-top: 0.7rem;
+    text-align: right;
+    letter-spacing: 0.03em;
+  }
+
+  /* Cork pins */
+  .cork-pin {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    z-index: 30;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.35);
+  }
+
+  /* Lightbox overlay */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    cursor: zoom-out;
+  }
+
+  .lightbox.open { display: flex; }
+
+  .lightbox-content {
+    max-width: 680px;
+    width: 100%;
+    position: relative;
+    animation: lbIn 0.35s ease;
+  }
+
+  .lightbox-paper {
+    background: #ffffff;
+    padding: 12px 12px 44px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+
+  .lightbox-img {
+    width: 100%;
+    display: block;
+    filter: none;
+  }
+
+  .lightbox-caption {
+    font-family: 'Caveat', cursive;
+    font-size: 1.1rem;
+    color: #444;
+    text-align: center;
+    margin-top: 9px;
+    font-weight: 600;
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: -42px;
+    right: 0;
+    color: #ddd;
+    background: none;
+    border: none;
+    font-family: 'Special Elite', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .lightbox-close:hover { opacity: 1; }
+
+  /* Letter lightbox */
+  .letter-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    cursor: default;
+    overflow-y: auto;
+  }
+
+  .letter-lightbox.open { display: flex; }
+
+  .letter-lightbox-content {
+    max-width: 580px;
+    width: 100%;
+    animation: lbIn 0.4s ease;
+    position: relative;
+  }
+
+  .letter-full {
+    background: #ffffff;
+    padding: 2.8rem 2.2rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    background-image:
+      repeating-linear-gradient(
+        transparent,
+        transparent 30px,
+        rgba(100, 120, 200, 0.1) 30px,
+        rgba(100, 120, 200, 0.1) 31px
+      );
+    position: relative;
+  }
+
+  .letter-full::before {
+    content: '';
+    position: absolute;
+    left: 3.8rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(200, 80, 80, 0.15);
+  }
+
+  .letter-full-salutation {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.35rem;
+    color: #1a1a1a;
+    margin-bottom: 1.4rem;
+  }
+
+  .letter-full-body {
+    font-family: 'IM Fell English', serif;
+    font-size: 0.98rem;
+    color: #222;
+    line-height: 2;
+    text-align: justify;
+  }
+
+  .letter-full-body p {
+    margin-bottom: 1.1rem;
+    text-indent: 1.4rem;
+  }
+
+  .letter-full-closing {
+    font-family: 'Caveat', cursive;
+    font-size: 1.25rem;
+    color: #5a3e28;
+    margin-top: 1.4rem;
+    text-align: right;
+    font-weight: 700;
+  }
+
+  .letter-lbclose {
+    position: absolute;
+    top: -42px;
+    right: 0;
+    color: #ddd;
+    background: none;
+    border: none;
+    font-family: 'Special Elite', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .letter-lbclose:hover { opacity: 1; }
+
+  /* Hint text */
+  .hint {
+    text-align: center;
+    font-family: 'Caveat', cursive;
+    color: #8a6a4a;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    padding: 1rem 2rem 2rem;
+    opacity: 0;
+    animation: fadeUp 1.4s ease forwards 1.5s;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateY(18px) rotate(var(--tilt, 0deg)); }
+    to   { opacity: 1; transform: translateY(0)    rotate(var(--tilt, 0deg)); }
+  }
+
+  @keyframes lbIn {
+    from { opacity: 0; transform: scale(0.93) translateY(16px); }
+    to   { opacity: 1; transform: scale(1)    translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">Anfila &amp; Mustafa</div>
+  <div class="header-sub">seven years of us ✶ our memory board</div>
+  <div class="header-divider"></div>
+</div>
+
+<div class="hint">click any photo to enlarge · click the letter to read in full</div>
+
+<div class="board">
+  <div class="cork-area">
+
+    <!-- Decorative corner pins -->
+    <div class="cork-pin" style="top:12px; left:18px; background:radial-gradient(circle at 35% 35%,#e06060,#902020);"></div>
+    <div class="cork-pin" style="top:12px; right:18px; background:radial-gradient(circle at 35% 35%,#60a0e0,#204080);"></div>
+    <div class="cork-pin" style="bottom:16px; left:18px; background:radial-gradient(circle at 35% 35%,#80d080,#206020);"></div>
+    <div class="cork-pin" style="bottom:16px; right:18px; background:radial-gradient(circle at 35% 35%,#e8c060,#a07020);"></div>
+
+    <div class="board-grid" id="boardGrid"></div>
+
+  </div>
+</div>
+
+<!-- Photo lightbox -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-content">
+    <button class="lightbox-close" id="lbClose">✕ close</button>
+    <div class="lightbox-paper">
+      <img class="lightbox-img" id="lbImg" src="" alt="">
+      <div class="lightbox-caption" id="lbCaption"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Letter lightbox -->
+<div class="letter-lightbox" id="letterLb">
+  <div class="letter-lightbox-content">
+    <button class="letter-lbclose" id="letterClose">✕ close</button>
+    <div class="letter-full">
+      <div class="letter-full-salutation">To my person, my place, my other half</div>
+      <div class="letter-full-body">
+        <p>It does feel surreal that we have been doing this for seven years, loving each other across seas then, and now across continents. Not a day passes without me wondering how fate could have been written in such a way that it almost teases its readers. From avoiding romantic gestures to knitting a forever vow. You flipped my world over.</p>
+        <p>I might act like I'm used to watching you achieve your dreams one big step at a time, but it never truly stops me from falling into awe over and over again. It always brings me back to the very first reason I was so sure of you. As an individual, you inspire me. As a woman, you make me want to follow your lead.</p>
+        <p>I hope this year brings you peace in your heart, success in everything you work for, good health, and happiness that finds you in the smallest moments too. And selfishly, I hope this is one step closer to the day we no longer have to count hours apart or say goodbye through a screen.</p>
+      </div>
+      <div class="letter-full-closing">— forever yours, Adek ♡</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PLACEHOLDER_IMAGES = [
+    { url: 'https://lh3.googleusercontent.com/d/1dpiwrwIYCSe492sJDDFEs1US8QbALbWs', caption: 'the beginning of everything', date: '2020' },
+    { url: 'https://lh3.googleusercontent.com/d/1znKcDi1UARYsDu9ypFtaUdZ4ROJAFAnC', caption: 'a jellyfish, if you watch it long enough, begins to look like a heart beating', date: '2025' },
+    { url: 'https://lh3.googleusercontent.com/d/1-6IS4EkVF3NJRRAPRid8p7qZILiF3xJV', caption: 'you flipped my world over, literally', date: '2025' },
+    { url: 'https://lh3.googleusercontent.com/d/17WMKq9GL8VR2DGK1NZMKJ4T2wAif5Vwd', caption: 'good health, and all the small happinesses too', date: '2024' },
+    { url: 'https://lh3.googleusercontent.com/d/1C66J10y4ghleHE-bMfxmKRU0tLm2IaVd', caption: 'still my favourite face', date: '2025' },
+    { url: 'https://lh3.googleusercontent.com/d/1tDsImoARvoXucSaeAC25qiWGwtQi4rVn', caption: 'i was always sure of you', date: '2025' },
+    { url: 'https://lh3.googleusercontent.com/d/1WkpH24hX-l475TAJpvvPb653rEgZfbot', caption: 'one big dream at a time', date: '2022' },
+    { url: 'https://lh3.googleusercontent.com/d/1Uh-7inMfk2q0MDu9PzaxJ8aYvwhuzz3u', caption: 'freezing time because forever still feels too short', date: '2024' },
+    { url: 'https://lh3.googleusercontent.com/d/1h59b4kAXzbWKCunJFt3dOkQGHEhE1JGQ', caption: 'watching you be disciplined is why i follow your lead', date: '2023' },
+    { url: 'https://lh3.googleusercontent.com/d/16yj2mIKkNiUTjCJycpMDzOi3QtoyXMCB', caption: 'loving each other across seas, then continents, then everywhere', date: '2023' },
+    { url: 'https://lh3.googleusercontent.com/d/1gNn1MOjPT_qsqJrHD375NzKGy9VLjIDA', caption: 'a promise', date: '2025' },
+    { url: 'https://lh3.googleusercontent.com/d/1wuDDPYR1Qe7hJYyXKffvryBxnrzVmFDF', caption: 'even falling looks good when its with you', date: '2024' },
+    { url: 'https://lh3.googleusercontent.com/d/10ekopcb4c1tGfSk-zcKaMEOgjQ1clPrI', caption: 'happiness that finds you in the smallest moments', date: '2023' },
+    { url: 'https://lh3.googleusercontent.com/d/1-Vg81INcgwNJE5ejKULhuc-z8-qNLuQK', caption: 'where your dreams lead, i follow', date: '2023' },
+    { url: 'https://lh3.googleusercontent.com/d/1EEjYcRhU61EFvwZUca9UJ0Vc41jz03UG', caption: 'counting down to no more goodbyes', date: '2024' },
+  ];
+
+  const STICKY_NOTES = [
+    { text: '🎂 HAPPY BIRTHDAY FOR US 🎂', color: '#f7e98e', tilt: 2.5, big: true },
+    { text: 'seven years of choosing each other, every single day 🌿', color: '#b8ddb8', tilt: -3 },
+    { text: 'from across the sea to across the world — still us ✈', color: '#a8d8e8', tilt: 1.5 },
+    { text: 'seal a promise 💍', color: '#f7c4a0', tilt: -2 },
+    { text: 'your dreams are my favourite thing to watch come true 🌟', color: '#c4b8e0', tilt: 3 },
+    { text: 'one day, no more goodbyes through a screen 💻', color: '#f4a0a8', tilt: -1.5 },
+    { text: 'forever is written in the way you make me feel safe ✨', color: '#f9e0a0', tilt: 2 },
+  ];
+
+  const tilts = [-3.5,-2,-1,0.5,1.5,2.5,3,-2.5,1,-1,2,-0.5,3.5,-3,0.8,-1.8,2.2];
+  const tapeTilts = [-3,2,-1,4,-2,3,-4,1];
+
+  function makePinHtml() {
+    const colors = ['#e06060','#60a0e0','#e8c060','#80d080','#d080c0','#e09060'];
+    const c = colors[Math.floor(Math.random()*colors.length)];
+    return `<div style="position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 35% 35%,${c},${c}99);box-shadow:0 2px 4px rgba(0,0,0,0.4);z-index:30;"></div>`;
+  }
+
+  const items = [];
+  items.push({ type: 'letter' });
+  for (let i = 0; i < 5; i++) items.push({ type: 'photo', idx: i });
+  for (let s = 0; s < 3; s++) items.push({ type: 'sticky', idx: s });
+  for (let i = 5; i < 10; i++) items.push({ type: 'photo', idx: i });
+  for (let s = 3; s < 5; s++) items.push({ type: 'sticky', idx: s });
+  for (let i = 10; i < 15; i++) items.push({ type: 'photo', idx: i });
+  for (let s = 5; s < 7; s++) items.push({ type: 'sticky', idx: s });
+
+  const grid = document.getElementById('boardGrid');
+  let delay = 0;
+
+  items.forEach((item, i) => {
+    delay = 0.06 + i * 0.055;
+
+    if (item.type === 'photo') {
+      const p = PLACEHOLDER_IMAGES[item.idx];
+      const tilt = tilts[item.idx % tilts.length];
+      const tapeTilt = tapeTilts[item.idx % tapeTilts.length];
+      const div = document.createElement('div');
+      div.className = 'photo-card';
+      div.style.cssText = `--tilt:${tilt}deg;--delay:${delay}s;`;
+      div.innerHTML = `
+        ${makePinHtml()}
+        <div class="photo-inner" style="--tape-rot:${tapeTilt}deg;">
+          <img class="photo-img" src="${p.url}" alt="${p.caption}" loading="lazy">
+          <div class="photo-caption">${p.caption}</div>
+          <div class="photo-date">${p.date}</div>
+        </div>`;
+      div.addEventListener('click', () => openLightbox(p.url, p.caption));
+      grid.appendChild(div);
+    }
+
+    else if (item.type === 'sticky') {
+      const s = STICKY_NOTES[item.idx];
+      const div = document.createElement('div');
+      div.className = 'sticky-note';
+      div.style.cssText = `--tilt:${s.tilt}deg;--delay:${delay}s;`;
+      div.innerHTML = `
+        ${makePinHtml()}
+        <div class="sticky-inner" style="background:${s.color};">
+          <div class="sticky-text${s.big ? ' big' : ''}">${s.text}</div>
+        </div>`;
+      grid.appendChild(div);
+    }
+
+    else if (item.type === 'letter') {
+      const div = document.createElement('div');
+      div.className = 'letter-card';
+      div.style.cssText = `--delay:${delay}s;`;
+      div.innerHTML = `
+        ${makePinHtml()}
+        <div class="letter-inner">
+          <div class="letter-salutation">For Mamas.</div>
+          <div class="letter-body">
+            <p>It does feel surreal that we have been doing this for seven years, loving each other across seas then, and now across continents. Not a day passes without me wondering how fate could have been written in such a way that it almost teases its readers...</p>
+          </div>
+          <div class="letter-preview">— tap to read the full letter ♡</div>
+        </div>`;
+      div.addEventListener('click', () => openLetter());
+      grid.appendChild(div);
+    }
+  });
+
+  // Lightbox
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  const lbCap = document.getElementById('lbCaption');
+  const lbClose = document.getElementById('lbClose');
+
+  function openLightbox(url, caption) {
+    lbImg.src = url;
+    lbCap.textContent = caption;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  lb.addEventListener('click', e => {
+    if (e.target === lb || e.target === lbClose) {
+      lb.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+
+  // Letter lightbox
+  const letterLb = document.getElementById('letterLb');
+  const letterClose = document.getElementById('letterClose');
+
+  function openLetter() {
+    letterLb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  letterLb.addEventListener('click', e => {
+    if (e.target === letterLb || e.target === letterClose) {
+      letterLb.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      lb.classList.remove('open');
+      letterLb.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+</script>
+</body>
+</html>
